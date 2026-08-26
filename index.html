@@ -1,0 +1,946 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SEARCH DEEP — Encontre negócios. Descubra oportunidades.</title>
+  <meta name="description" content="Plataforma inteligente de pesquisa e prospecção comercial de estabelecimentos. Encontre, analise e conecte-se com potenciais clientes." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <link rel="stylesheet" href="css/styles.css" />
+</head>
+<body>
+  <!-- ============ HOTBAR / NAVBAR ============ -->
+  <header class="hotbar" id="hotbar">
+    <div class="hotbar-inner">
+      <a href="#home" class="brand" data-route="home">
+        <div class="brand-mark">
+          <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M12 2L2 7v10l10 5 10-5V7L12 2z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/>
+            <path d="M2 7l10 5 10-5" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/>
+            <path d="M12 22V12" stroke="currentColor" stroke-width="1.5"/>
+            <circle cx="12" cy="12" r="2.5" fill="currentColor"/>
+          </svg>
+        </div>
+        <div class="brand-text">
+          <span class="brand-name">SEARCH DEEP</span>
+          <span class="brand-tag">Prospecção Inteligente</span>
+        </div>
+      </a>
+
+      <nav class="nav-links" id="navLinks">
+        <a href="#home" data-route="home" class="nav-link">Explorar</a>
+        <a href="#explore" data-route="explore" class="nav-link">Mapa</a>
+        <a href="#demos" data-route="demos" class="nav-link">Templates</a>
+        <a href="#oportunidades" data-route="opportunities" class="nav-link">Oportunidades</a>
+        <a href="#sobre" data-route="about" class="nav-link">Sobre</a>
+      </nav>
+
+      <button class="loc-chip" id="locChip" title="Alterar cidade">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+        <span>Curitiba, PR</span>
+      </button>
+
+      <div class="nav-actions">
+        <button class="btn btn-ghost" id="addBizBtn">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg>
+          <span>Adicionar negócio</span>
+        </button>
+        <button class="btn btn-primary" data-route="demos">
+          <span>Projetos</span>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M13 5l7 7-7 7"/></svg>
+        </button>
+        <button class="user-chip" id="userChip" style="display:none;" title="Minha conta">
+          <div class="user-avatar" id="userAvatar">U</div>
+          <span id="userName">Usuário</span>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m6 9 6 6 6-6"/></svg>
+        </button>
+        <button class="hamburger" id="hamburger" aria-label="Menu">
+          <span></span><span></span><span></span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- ============ ROUTES ============ -->
+  <main id="app">
+
+    <!-- ============ AUTH (LOGIN / CADASTRO) ============ -->
+    <section class="route auth-view active" data-view="auth">
+      <div class="auth-bg">
+        <canvas id="authParticles"></canvas>
+        <div class="grid-overlay"></div>
+        <div class="glow glow-1"></div>
+        <div class="glow glow-2"></div>
+      </div>
+
+      <div class="auth-wrap">
+        <div class="auth-side">
+          <a href="#" class="brand auth-brand">
+            <div class="brand-mark">
+              <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M12 2L2 7v10l10 5 10-5V7L12 2z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/>
+                <path d="M2 7l10 5 10-5" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/>
+                <path d="M12 22V12" stroke="currentColor" stroke-width="1.5"/>
+                <circle cx="12" cy="12" r="2.5" fill="currentColor"/>
+              </svg>
+            </div>
+            <div class="brand-text">
+              <span class="brand-name">SEARCH DEEP</span>
+              <span class="brand-tag">Encontre negócios. Descubra oportunidades.</span>
+            </div>
+          </a>
+
+          <h1 class="auth-headline">A plataforma inteligente de<br/><span class="grad">prospecção comercial</span> para Curitiba.</h1>
+          <p class="auth-sub">Mapeie, analise e conecte-se com potenciais clientes. Transforme o mapa da sua cidade em um funil de vendas ativo.</p>
+
+          <div class="auth-stats">
+            <div class="as-item"><div class="as-num">128</div><div class="as-lbl">Estabelecimentos</div></div>
+            <div class="as-item"><div class="as-num">42</div><div class="as-lbl">Oportunidades</div></div>
+            <div class="as-item"><div class="as-num">17</div><div class="as-lbl">Contatos ativos</div></div>
+          </div>
+
+          <div class="auth-quote">
+            <div class="aq-quote">"O próximo cliente pode estar a poucos quilômetros. O Search Deep encontra ele para você."</div>
+            <div class="aq-author">— Equipe Search Deep</div>
+          </div>
+        </div>
+
+        <div class="auth-card">
+          <div class="auth-tabs">
+            <button class="auth-tab active" data-tab="login">Entrar</button>
+            <button class="auth-tab" data-tab="signup">Criar conta</button>
+          </div>
+
+          <!-- LOGIN -->
+          <form class="auth-form" id="loginForm">
+            <h2 class="auth-title">Bem-vindo de volta</h2>
+            <p class="auth-sub2">Acesse sua conta e continue prospectando.</p>
+
+            <label class="af-label">E-mail
+              <div class="af-input">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+                <input type="email" id="loginEmail" placeholder="voce@empresa.com.br" required />
+              </div>
+            </label>
+
+            <label class="af-label">Senha
+              <div class="af-input">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                <input type="password" id="loginPass" placeholder="••••••••" required />
+                <button type="button" class="af-eye" data-target="loginPass">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                </button>
+              </div>
+            </label>
+
+            <div class="af-row">
+              <label class="af-check"><input type="checkbox" /> <span>Lembrar de mim</span></label>
+              <a href="#" class="af-link">Esqueceu a senha?</a>
+            </div>
+
+            <button type="submit" class="btn btn-primary btn-lg" style="width:100%;justify-content:center;">
+              <span>Entrar no Search Deep</span>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M13 5l7 7-7 7"/></svg>
+            </button>
+
+            <div class="af-divider"><span>ou continue com</span></div>
+
+            <div class="af-social">
+              <button type="button" class="af-sbtn" data-prov="google">
+                <svg viewBox="0 0 24 24" fill="currentColor"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/></svg>
+                Google
+              </button>
+              <button type="button" class="af-sbtn" data-prov="gh">
+                <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0 0 24 12c0-6.63-5.37-12-12-12z"/></svg>
+                GitHub
+              </button>
+            </div>
+
+            <p class="af-foot">Ao continuar, você concorda com nossos <a>Termos</a> e <a>Política de Privacidade</a>.</p>
+          </form>
+
+          <!-- SIGNUP -->
+          <form class="auth-form" id="signupForm" style="display:none;">
+            <h2 class="auth-title">Crie sua conta</h2>
+            <p class="auth-sub2">Comece a prospectar em Curitiba em menos de 1 minuto.</p>
+
+            <label class="af-label">Nome completo
+              <div class="af-input">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                <input type="text" id="signupName" placeholder="Seu nome" required />
+              </div>
+            </label>
+
+            <label class="af-label">E-mail profissional
+              <div class="af-input">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+                <input type="email" id="signupEmail" placeholder="voce@empresa.com.br" required />
+              </div>
+            </label>
+
+            <label class="af-label">Senha
+              <div class="af-input">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                <input type="password" id="signupPass" placeholder="Mínimo 8 caracteres" required minlength="6" />
+                <button type="button" class="af-eye" data-target="signupPass">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                </button>
+              </div>
+            </label>
+
+            <label class="af-check" style="margin:6px 0 16px;">
+              <input type="checkbox" required /> <span>Aceito receber novidades do Search Deep</span>
+            </label>
+
+            <button type="submit" class="btn btn-primary btn-lg" style="width:100%;justify-content:center;">
+              <span>Criar conta gratuita</span>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M13 5l7 7-7 7"/></svg>
+            </button>
+
+            <p class="af-foot">Já tem conta? <a href="#" class="auth-link" data-tab="login">Entrar</a></p>
+          </form>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ ABOUT (PRIMEIRA PÁGINA APÓS LOGIN) ============ -->
+    <section class="route" data-view="about">
+      <div class="about-bg">
+        <div class="grid-overlay"></div>
+        <div class="glow glow-1"></div>
+        <div class="glow glow-2"></div>
+      </div>
+
+      <div class="container" style="position:relative;z-index:1;">
+        <!-- HERO SOBRE -->
+        <section class="about-hero">
+          <div class="hero-badge">
+            <span class="dot-live"></span>
+            <span>Sobre nós · Curitiba, PR</span>
+          </div>
+          <h1 class="hero-title">
+            Nós transformamos o mapa da sua cidade<br/>
+            <span class="grad">em um funil de vendas ativo.</span>
+          </h1>
+          <p class="hero-sub">O Search Deep é uma plataforma de prospecção comercial inteligente. Conectamos empresas e profissionais de vendas aos negócios locais que mais precisam de presença digital — começando por Curitiba.</p>
+
+          <div class="about-quick-stats">
+            <div class="aq-stat"><div class="aq-num">2026</div><div class="aq-lbl">Fundação</div></div>
+            <div class="aq-stat"><div class="aq-num">1</div><div class="aq-lbl">Cidade foco</div></div>
+            <div class="aq-stat"><div class="aq-num">128+</div><div class="aq-lbl">Estabelecimentos</div></div>
+            <div class="aq-stat"><div class="aq-num">∞</div><div class="aq-lbl">Oportunidades</div></div>
+          </div>
+        </section>
+
+        <!-- MISSÃO VISÃO VALORES + O QUE NÃO SOMOS -->
+        <section class="section">
+          <div class="section-head" style="text-align:center;flex-direction:column;align-items:center;">
+            <div>
+              <div class="eyebrow">Nosso DNA</div>
+              <h2 class="section-title">Missão, Visão e Valores</h2>
+              <p class="section-sub">Acreditamos que cada negócio local merece ser encontrado. E que cada profissional de vendas merece as melhores ferramentas para encontrar.</p>
+            </div>
+          </div>
+          <div class="mv-grid">
+            <div class="mv-card">
+              <div class="mv-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="10"/><polygon points="10 8 16 12 10 16 10 8"/></svg>
+              </div>
+              <h3>Missão</h3>
+              <p>Democratizar o acesso à prospecção comercial inteligente. Permitir que qualquer profissional encontre, analise e se conecte com potenciais clientes usando dados geográficos e comportamentais.</p>
+            </div>
+            <div class="mv-card highlight">
+              <div class="mv-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="3"/><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7z"/></svg>
+              </div>
+              <h3>Visão</h3>
+              <p>Ser a principal plataforma de prospecção comercial da América Latina. Mapear 1 milhão de negócios locais e gerar 100 mil conexões B2B de alto valor até 2030.</p>
+            </div>
+            <div class="mv-card">
+              <div class="mv-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
+              </div>
+              <h3>Valores</h3>
+              <p>Diretamente, sem rodeios. Profissionais que respeitam o tempo alheio. Tecnologia que serve, não que impressiona. Foco no resultado do cliente.</p>
+            </div>
+          </div>
+
+          <div class="subsection-head">
+            <h3 class="subsection-title">O que o Search Deep <span class="grad">não é</span></h3>
+            <p class="subsection-sub">Ser claro sobre isso também é parte do que somos.</p>
+          </div>
+          <div class="not-grid">
+            <div class="not-item">
+              <div class="not-x">✕</div>
+              <div>
+                <h4>Não somos um diretório genérico</h4>
+                <p>Não somos mais um Google Maps. Somos uma ferramenta de prospecção ativa.</p>
+              </div>
+            </div>
+            <div class="not-item">
+              <div class="not-x">✕</div>
+              <div>
+                <h4>Não somos uma rede social</h4>
+                <p>Não tem feed, likes ou stories. O foco é conexão comercial, não engajamento.</p>
+              </div>
+            </div>
+            <div class="not-item">
+              <div class="not-x">✕</div>
+              <div>
+                <h4>Não somos uma agência</h4>
+                <p>Não executamos o projeto. Fornecemos a ferramenta para quem vende e para quem produz.</p>
+              </div>
+            </div>
+            <div class="not-item">
+              <div class="not-x">✕</div>
+              <div>
+                <h4>Não somos um CRM tradicional</h4>
+                <p>Não tem 300 campos e 15 dashboards. Foco no que importa: encontrar e fechar.</p>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- O QUE SOMOS + QUEM SOMOS -->
+        <section class="section section-dark">
+          <div class="section-head" style="text-align:center;flex-direction:column;align-items:center;">
+            <div>
+              <div class="eyebrow">O que somos</div>
+              <h2 class="section-title">Mais que uma ferramenta. Um sistema operacional de vendas.</h2>
+              <p class="section-sub">O Search Deep foi criado para um único propósito: encontrar oportunidades reais de negócio onde elas existem — nos comércios, serviços e empresas locais.</p>
+            </div>
+          </div>
+
+          <div class="what-grid">
+            <div class="what-card">
+              <div class="what-num">01</div>
+              <h4>Plataforma de mapeamento inteligente</h4>
+              <p>Indexamos e classificamos estabelecimentos por segmento, bairro, avaliação, presença digital e potencial de oportunidade. Tudo em um único painel.</p>
+            </div>
+            <div class="what-card">
+              <div class="what-num">02</div>
+              <h4>CRM leve e direto</h4>
+              <p>Pipeline enxuto com 7 estágios, notas por prospect e marcação de status. Sem complicação. Pensado para ser usado todos os dias.</p>
+            </div>
+            <div class="what-card">
+              <div class="what-num">03</div>
+              <h4>Gerador de proposta integrado</h4>
+              <p>Conecte uma oportunidade a um projeto demo do segmento. Crie uma proposta visual, envie por WhatsApp com mensagem pré-formatada.</p>
+            </div>
+            <div class="what-card">
+              <div class="what-num">04</div>
+              <h4>Biblioteca de templates</h4>
+              <p>10 landing pages modelo por segmento. Mostre ao cliente o que pode ser criado — antes mesmo de fechar a venda.</p>
+            </div>
+          </div>
+
+          <div class="subsection-head" style="text-align:center;">
+            <div class="eyebrow">Quem somos</div>
+            <h3 class="subsection-title">Construído por quem entende de prospecção e produto digital</h3>
+            <p class="subsection-sub" style="margin-left:auto;margin-right:auto;">Um time pequeno, sênior e obcecado por transformar a maneira como negócios locais são encontrados.</p>
+          </div>
+          <div class="team-grid">
+            <div class="team-card">
+              <div class="team-avatar" style="background: linear-gradient(135deg, #1e6cff 0%, #22d3ee 100%);">LF</div>
+              <h4>Lucas Ferraz</h4>
+              <div class="team-role">CEO & Produto</div>
+              <p>8 anos em vendas B2B e desenvolvimento de software. Já prospectou mais de 2.000 negócios locais pessoalmente.</p>
+            </div>
+            <div class="team-card">
+              <div class="team-avatar" style="background: linear-gradient(135deg, #f59e0b 0%, #ef4444 100%);">AM</div>
+              <h4>Ana Müller</h4>
+              <div class="team-role">CTO & Engenharia</div>
+              <p>Engenheira de software com passagem por 3 startups SaaS. Especialista em geolocalização e mapas interativos.</p>
+            </div>
+            <div class="team-card">
+              <div class="team-avatar" style="background: linear-gradient(135deg, #10b981 0%, #14b8a6 100%);">RC</div>
+              <h4>Rafael Costa</h4>
+              <div class="team-role">Design & UX</div>
+              <p>Designer de produto. Trabalhou em fintechs e ferramentas B2B. Apaixonado por interfaces que resolvem problemas reais.</p>
+            </div>
+            <div class="team-card">
+              <div class="team-avatar" style="background: linear-gradient(135deg, #a855f7 0%, #ec4899 100%);">JS</div>
+              <h4>Juliana Silva</h4>
+              <div class="team-role">Operações & Dados</div>
+              <p>Curitibana, conhece cada bairro. Responsável pela curadoria e classificação de oportunidades dos estabelecimentos.</p>
+            </div>
+          </div>
+        </section>
+
+        <!-- COMO FUNCIONA + NÚMEROS -->
+        <section class="section">
+          <div class="section-head" style="text-align:center;flex-direction:column;align-items:center;">
+            <div>
+              <div class="eyebrow">Como funciona</div>
+              <h2 class="section-title">Do mapa ao contrato em 6 passos</h2>
+              <p class="section-sub">Um fluxo direto, pensado para profissionais de vendas e desenvolvimento web.</p>
+            </div>
+          </div>
+          <div class="how-grid how-grid-compact">
+            <div class="how-card">
+              <div class="how-num">01</div>
+              <h4>Pesquise</h4>
+              <p>Use linguagem natural. "Pizzarias no Batel", "barbearias abertas agora".</p>
+            </div>
+            <div class="how-card">
+              <div class="how-num">02</div>
+              <h4>Encontre</h4>
+              <p>Resultados no mapa e em lista, com bairro, telefone, site e Instagram.</p>
+            </div>
+            <div class="how-card">
+              <div class="how-num">03</div>
+              <h4>Analise</h4>
+              <p>Classificação de oportunidade: Alta, Média ou Baixa, com explicação.</p>
+            </div>
+            <div class="how-card">
+              <div class="how-num">04</div>
+              <h4>Marque</h4>
+              <p>Adicione aos potenciais clientes e anote observações sobre o negócio.</p>
+            </div>
+            <div class="how-card">
+              <div class="how-num">05</div>
+              <h4>Demonstre</h4>
+              <p>Apresente uma landing page demo do segmento como prova visual.</p>
+            </div>
+            <div class="how-card">
+              <div class="how-num">06</div>
+              <h4>Feche</h4>
+              <p>Mensagem pré-pronta para WhatsApp. Follow-up, proposta, cliente.</p>
+            </div>
+          </div>
+
+          <div class="subsection-head" style="text-align:center;">
+            <div class="eyebrow">Nossos números</div>
+            <h3 class="subsection-title">Curitiba em números</h3>
+          </div>
+          <div class="mini-stats">
+            <div class="mini-stat"><div class="mini-num">1.8M</div><div class="mini-lbl">Habitantes em Curitiba</div></div>
+            <div class="mini-stat"><div class="mini-num">75k+</div><div class="mini-lbl">Estabelecimentos ativos</div></div>
+            <div class="mini-stat"><div class="mini-num">28</div><div class="mini-lbl">Bairros mapeados</div></div>
+            <div class="mini-stat"><div class="mini-num">12</div><div class="mini-lbl">Segmentos principais</div></div>
+          </div>
+        </section>
+
+        <!-- CTA -->
+        <section class="cta">
+          <div class="cta-card">
+            <div class="cta-text">
+              <h2>Pronto para começar a prospectar?</h2>
+              <p>Entre no app e descubra onde estão os próximos clientes da sua agência ou negócio digital.</p>
+            </div>
+            <div class="cta-actions">
+              <button class="btn btn-primary btn-lg" data-route="explore">
+                <span>Explorar Curitiba</span>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M13 5l7 7-7 7"/></svg>
+              </button>
+              <button class="btn btn-ghost btn-lg" data-route="demos">Ver templates</button>
+            </div>
+          </div>
+        </section>
+      </div>
+    </section>
+
+    <!-- ============ MAPA (busca + resultados no mapa) ============ -->
+    <section class="route" data-view="mapa">
+      <!-- HERO -->
+      <section class="hero" id="home">
+        <div class="hero-bg">
+          <div class="grid-overlay"></div>
+          <div class="glow glow-1"></div>
+          <div class="glow glow-2"></div>
+        </div>
+        <div class="container">
+          <div class="hero-badge">
+            <span class="dot-live"></span>
+            <span>Curitiba · 128 estabelecimentos indexados</span>
+          </div>
+          <h1 class="hero-title">
+            Encontre negócios.<br/>
+            <span class="grad">Descubra oportunidades.</span>
+          </h1>
+          <p class="hero-sub">
+            Pesquise estabelecimentos, encontre empresas próximas e identifique potenciais clientes para sua próxima oportunidade comercial. Mapeamento inteligente de negócios locais em Curitiba.
+          </p>
+
+          <form class="search-hero" id="searchHero">
+            <div class="search-input-wrap">
+              <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+              <input type="text" id="searchInput" placeholder="O que você está procurando? Ex: pizzarias no Batel" autocomplete="off"/>
+              <button type="submit" class="btn btn-primary btn-search">
+                <span>Pesquisar</span>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M13 5l7 7-7 7"/></svg>
+              </button>
+            </div>
+            <div class="search-suggestions" id="searchSuggestions"></div>
+            <div class="quick-tags">
+              <span class="quick-label">Sugestões:</span>
+              <button class="chip" data-q="pizzarias">pizzarias</button>
+              <button class="chip" data-q="barbearias">barbearias</button>
+              <button class="chip" data-q="academias">academias</button>
+              <button class="chip" data-q="pet shops">pet shops</button>
+              <button class="chip" data-q="restaurantes">restaurantes</button>
+              <button class="chip" data-q="cafeterias">cafeterias</button>
+              <button class="chip" data-q="oficinas">oficinas</button>
+            </div>
+          </form>
+
+          <div class="hero-stats">
+            <div class="hstat">
+              <div class="hstat-num">128</div>
+              <div class="hstat-label">Estabelecimentos</div>
+            </div>
+            <div class="hstat">
+              <div class="hstat-num">14</div>
+              <div class="hstat-label">Categorias</div>
+            </div>
+            <div class="hstat">
+              <div class="hstat-num">28</div>
+              <div class="hstat-label">Bairros</div>
+            </div>
+            <div class="hstat">
+              <div class="hstat-num">42</div>
+              <div class="hstat-label">Oportunidades</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- CATEGORIAS -->
+      <section class="section" id="categorias">
+        <div class="container">
+          <div class="section-head" style="text-align:center;flex-direction:column;align-items:center;">
+            <div>
+              <div class="eyebrow">Categorias</div>
+              <h2 class="section-title">Explore por segmento</h2>
+              <p class="section-sub" style="margin-left:auto;margin-right:auto;">Selecione uma categoria para iniciar a busca automaticamente.</p>
+            </div>
+            <a class="link-arrow" data-route="explore">Ver todas
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M13 5l7 7-7 7"/></svg>
+            </a>
+          </div>
+          <div class="cat-grid" id="catGrid"></div>
+        </div>
+      </section>
+
+      <!-- EXPLORAR -->
+      <section class="section section-dark" id="explore">
+        <div class="container">
+          <div class="section-head">
+            <div>
+              <div class="eyebrow">Explorar Curitiba</div>
+              <h2 class="section-title">Resultados no mapa</h2>
+              <p class="section-sub">Lista e mapa lado a lado. Clique em um card para centralizar o mapa.</p>
+            </div>
+            <div class="view-toggle">
+              <button class="vt active" data-vt="split">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M12 3v18"/></svg>
+                Split
+              </button>
+              <button class="vt" data-vt="list">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/></svg>
+                Lista
+              </button>
+              <button class="vt" data-vt="map">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="3 6 9 3 15 6 21 3 21 18 15 21 9 18 3 21"/><line x1="9" y1="3" x2="9" y2="18"/><line x1="15" y1="6" x2="15" y2="21"/></svg>
+                Mapa
+              </button>
+            </div>
+          </div>
+
+          <div class="split-layout" id="splitLayout">
+            <!-- Painel de filtros + lista -->
+            <aside class="filters">
+              <div class="filters-head">
+                <h3>Filtros</h3>
+                <button class="link-reset" id="resetFilters">Limpar</button>
+              </div>
+              <div class="filter-group">
+                <label>Categoria</label>
+                <div class="pill-row" id="filterCat"></div>
+              </div>
+              <div class="filter-group">
+                <label>Bairro</label>
+                <select id="filterBairro" class="select">
+                  <option value="">Todos os bairros</option>
+                </select>
+              </div>
+              <div class="filter-group">
+                <label>Distância (km)</label>
+                <div class="range-row">
+                  <input type="range" id="filterDist" min="0" max="20" value="20" step="1" />
+                  <span class="range-val" id="filterDistVal">20 km</span>
+                </div>
+              </div>
+              <div class="filter-group">
+                <label>Avaliação mínima</label>
+                <div class="range-row">
+                  <input type="range" id="filterRate" min="0" max="5" value="0" step="0.5" />
+                  <span class="range-val" id="filterRateVal">0.0</span>
+                </div>
+              </div>
+              <div class="filter-group">
+                <div class="switch-row">
+                  <label class="switch-label">Aberto agora</label>
+                  <label class="switch">
+                    <input type="checkbox" id="filterOpen" />
+                    <span class="slider"></span>
+                  </label>
+                </div>
+                <div class="switch-row">
+                  <label class="switch-label">Possui website</label>
+                  <label class="switch">
+                    <input type="checkbox" id="filterWeb" />
+                    <span class="slider"></span>
+                  </label>
+                </div>
+                <div class="switch-row">
+                  <label class="switch-label">Possui Instagram</label>
+                  <label class="switch">
+                    <input type="checkbox" id="filterIg" />
+                    <span class="slider"></span>
+                  </label>
+                </div>
+              </div>
+              <div class="filter-group">
+                <label>Oportunidade</label>
+                <div class="pill-row" id="filterOpp">
+                  <button class="pill" data-opp="alta">Alta</button>
+                  <button class="pill" data-opp="media">Média</button>
+                  <button class="pill" data-opp="baixa">Baixa</button>
+                </div>
+              </div>
+            </aside>
+
+            <!-- Lista -->
+            <div class="results" id="results">
+              <div class="results-head">
+                <div class="results-count" id="resultsCount">0 resultados</div>
+                <div class="sort-row">
+                  <label>Ordenar:</label>
+                  <select id="sortBy" class="select select-sm">
+                    <option value="rel">Relevância</option>
+                    <option value="rate">Avaliação</option>
+                    <option value="dist">Distância</option>
+                    <option value="opp">Oportunidade</option>
+                  </select>
+                </div>
+              </div>
+              <div class="results-list" id="resultsList"></div>
+            </div>
+
+            <!-- Mapa -->
+            <div class="map-wrap" id="mapWrap">
+              <div class="map-floating" id="mapLegend">
+                <div class="legend-item"><span class="dot opp-alta"></span>Alta oportunidade</div>
+                <div class="legend-item"><span class="dot opp-media"></span>Média</div>
+                <div class="legend-item"><span class="dot opp-baixa"></span>Baixa</div>
+              </div>
+              <div id="map"></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- CTA -->
+      <section class="cta">
+        <div class="container">
+          <div class="cta-card">
+            <div class="cta-text">
+              <h2>O próximo cliente pode estar a poucos quilômetros.</h2>
+              <p>Refine os filtros, encontre o estabelecimento certo e mostre um template pronto como prova visual.</p>
+            </div>
+            <div class="cta-actions">
+              <button class="btn btn-primary btn-lg" data-route="demos">
+                <span>Ver templates</span>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M13 5l7 7-7 7"/></svg>
+              </button>
+              <button class="btn btn-ghost btn-lg" data-route="opportunities">Ver pipeline</button>
+            </div>
+          </div>
+        </div>
+      </section>
+    </section>
+
+    <!-- ============ OPORTUNIDADES ============ -->
+    <section class="route" data-view="opportunities">
+      <div class="container" style="padding-top:36px;">
+      <section class="section" id="oportunidades">
+        <div class="container">
+          <div class="section-head">
+            <div>
+              <div class="eyebrow">Prospecção</div>
+              <h2 class="section-title">Pipeline comercial</h2>
+              <p class="section-sub">Gerencie seus potenciais clientes e acompanhe o funil de vendas.</p>
+            </div>
+            <div class="kpi-row">
+              <div class="kpi"><div class="kpi-num" id="kpiTotal">0</div><div class="kpi-label">Oportunidades</div></div>
+              <div class="kpi"><div class="kpi-num" id="kpiContacted">0</div><div class="kpi-label">Contatados</div></div>
+              <div class="kpi"><div class="kpi-num" id="kpiPropostas">0</div><div class="kpi-label">Propostas</div></div>
+              <div class="kpi"><div class="kpi-num" id="kpiClientes">0</div><div class="kpi-label">Clientes</div></div>
+            </div>
+          </div>
+          <div class="pipeline" id="pipeline"></div>
+        </div>
+      </section>
+      </div>
+    </section>
+
+    <!-- ============ TEMPLATES ============ -->
+    <section class="route" data-view="demos">
+      <div class="container" style="padding-top:36px;">
+      <section class="section section-dark" id="demos">
+        <div class="container">
+          <div class="section-head">
+            <div>
+              <div class="eyebrow">Portfólio</div>
+              <h2 class="section-title">Templates</h2>
+              <p class="section-sub">Mostre ao cliente o que podemos criar. Selecione um modelo por segmento e use como referência na proposta.</p>
+            </div>
+          </div>
+          <div class="demos-grid" id="demosGrid"></div>
+        </div>
+      </section>
+      </div>
+    </section>
+
+    <!-- ============ DETALHES (overlay) ============ -->
+    <div class="modal-overlay" id="bizModal" aria-hidden="true">
+      <div class="modal" role="dialog">
+        <div class="modal-head">
+          <div>
+            <div class="modal-eyebrow" id="mEyebrow">Estabelecimento</div>
+            <h2 class="modal-title" id="mTitle">—</h2>
+          </div>
+          <button class="icon-btn" id="closeModal" aria-label="Fechar">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6 6 18M6 6l12 12"/></svg>
+          </button>
+        </div>
+        <div class="modal-body" id="mBody"></div>
+      </div>
+    </div>
+
+    <!-- ============ PROPOSTA (overlay) ============ -->
+    <div class="modal-overlay" id="propModal" aria-hidden="true">
+      <div class="modal modal-lg" role="dialog">
+        <div class="modal-head">
+          <div>
+            <div class="modal-eyebrow">Gerador de Proposta</div>
+            <h2 class="modal-title" id="pTitle">Criar proposta</h2>
+          </div>
+          <button class="icon-btn" id="closeProp" aria-label="Fechar">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6 6 18M6 6l12 12"/></svg>
+          </button>
+        </div>
+        <div class="modal-body" id="pBody"></div>
+      </div>
+    </div>
+
+    <!-- ============ DEMO PREVIEW (overlay) ============ -->
+    <div class="modal-overlay" id="demoModal" aria-hidden="true">
+      <div class="modal modal-xl" role="dialog">
+        <div class="modal-head">
+          <div>
+            <div class="modal-eyebrow">Template · Prévia</div>
+            <h2 class="modal-title" id="dTitle">—</h2>
+          </div>
+          <div class="device-toggle">
+            <button class="dev" data-dev="desktop">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg>
+              Desktop
+            </button>
+            <button class="dev" data-dev="tablet">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="2" width="16" height="20" rx="2"/><path d="M11 18h2"/></svg>
+              Tablet
+            </button>
+            <button class="dev" data-dev="mobile">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="5" y="2" width="14" height="20" rx="2"/><path d="M12 18h.01"/></svg>
+              Mobile
+            </button>
+          </div>
+          <button class="icon-btn" id="closeDemo" aria-label="Fechar">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6 6 18M6 6l12 12"/></svg>
+          </button>
+        </div>
+        <div class="modal-body modal-body-preview" id="dBody"></div>
+        <div class="modal-foot">
+          <button class="btn btn-ghost" id="useDemoRef">
+            <span>Usar como referência</span>
+          </button>
+          <button class="btn btn-primary" id="useDemoProp">
+            <span>Criar proposta com este projeto</span>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M13 5l7 7-7 7"/></svg>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ============ SOBRE (contato / institucional) ============ -->
+    <section class="route" data-view="sobre">
+      <div class="about-bg">
+        <div class="grid-overlay"></div>
+        <div class="glow glow-1"></div>
+        <div class="glow glow-2"></div>
+      </div>
+      <div class="container" style="position:relative;z-index:1;">
+        <section class="about-hero">
+          <div class="hero-badge">
+            <span class="dot-live"></span>
+            <span>Fale com a gente</span>
+          </div>
+          <h1 class="hero-title">Vamos conversar sobre <span class="grad">o seu próximo cliente.</span></h1>
+          <p class="hero-sub">Dúvidas, parcerias ou sugestões — nossa equipe responde rápido. Escolhe o canal que preferir.</p>
+        </section>
+
+        <section class="section">
+          <div class="mv-grid">
+            <div class="mv-card">
+              <div class="mv-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg>
+              </div>
+              <h3>WhatsApp</h3>
+              <p>Resposta em minutos, direto com o time. Melhor canal pra dúvidas rápidas.</p>
+              <a class="btn btn-primary" href="https://wa.me/5541999990000" target="_blank" rel="noopener" style="margin-top:14px;">
+                <span>Chamar no WhatsApp</span>
+              </a>
+            </div>
+            <div class="mv-card highlight">
+              <div class="mv-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+              </div>
+              <h3>E-mail</h3>
+              <p>Pra propostas comerciais, parcerias e imprensa.</p>
+              <a class="btn btn-ghost" href="mailto:contato@searchdeep.com.br" style="margin-top:14px;">
+                <span>contato@searchdeep.com.br</span>
+              </a>
+            </div>
+            <div class="mv-card">
+              <div class="mv-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="1" fill="currentColor" stroke="none"/></svg>
+              </div>
+              <h3>Instagram</h3>
+              <p>Bastidores do produto, novidades e cases de clientes.</p>
+              <a class="btn btn-ghost" href="#" target="_blank" rel="noopener" style="margin-top:14px;">
+                <span>@searchdeep.cwb</span>
+              </a>
+            </div>
+          </div>
+        </section>
+
+        <section class="section section-dark">
+          <div class="section-head" style="text-align:center;flex-direction:column;align-items:center;">
+            <div>
+              <div class="eyebrow">Perguntas frequentes</div>
+              <h2 class="section-title">Ainda com dúvidas?</h2>
+            </div>
+          </div>
+          <div class="not-grid">
+            <div class="not-item" style="border-left-color:var(--primary);">
+              <div>
+                <h4>O Search Deep é gratuito?</h4>
+                <p>Sim, a busca e o mapeamento são gratuitos. Recursos avançados de proposta e CRM fazem parte do plano Pro.</p>
+              </div>
+            </div>
+            <div class="not-item" style="border-left-color:var(--primary);">
+              <div>
+                <h4>Atende outras cidades além de Curitiba?</h4>
+                <p>Curitiba é nossa cidade piloto. Novas cidades entram no roadmap conforme a demanda.</p>
+              </div>
+            </div>
+            <div class="not-item" style="border-left-color:var(--primary);">
+              <div>
+                <h4>Os dados dos estabelecimentos são reais?</h4>
+                <p>Nesta versão de demonstração, os dados são fictícios para fins de teste do produto.</p>
+              </div>
+            </div>
+            <div class="not-item" style="border-left-color:var(--primary);">
+              <div>
+                <h4>Posso cadastrar meu próprio negócio?</h4>
+                <p>Sim! Use o botão "Adicionar negócio" no topo da página.</p>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section class="cta">
+          <div class="cta-card">
+            <div class="cta-text">
+              <h2>Prefere ver o produto em ação?</h2>
+              <p>Volte pro mapa e explore os estabelecimentos de Curitiba agora mesmo.</p>
+            </div>
+            <div class="cta-actions">
+              <button class="btn btn-primary btn-lg" data-route="explore">
+                <span>Ir para o Mapa</span>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M13 5l7 7-7 7"/></svg>
+              </button>
+            </div>
+          </div>
+        </section>
+      </div>
+    </section>
+
+    <!-- ============ TOAST ============ -->
+    <div class="toast-wrap" id="toastWrap"></div>
+  </main>
+
+  <!-- ============ FOOTER ============ -->
+  <footer class="footer">
+    <div class="container footer-grid">
+      <div>
+        <div class="brand">
+          <div class="brand-mark">
+            <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M12 2L2 7v10l10 5 10-5V7L12 2z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/>
+              <path d="M2 7l10 5 10-5" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/>
+              <path d="M12 22V12" stroke="currentColor" stroke-width="1.5"/>
+              <circle cx="12" cy="12" r="2.5" fill="currentColor"/>
+            </svg>
+          </div>
+          <div class="brand-text">
+            <span class="brand-name">SEARCH DEEP</span>
+            <span class="brand-tag">Encontre negócios. Descubra oportunidades.</span>
+          </div>
+        </div>
+        <p class="footer-desc">Plataforma de prospecção comercial inteligente focada em negócios locais. Mapeamento, análise e contato.</p>
+      </div>
+      <div>
+        <h5>Produto</h5>
+        <a data-route="home">Explorar</a>
+        <a data-route="explore">Mapa</a>
+        <a data-route="demos">Templates</a>
+        <a data-route="opportunities">Oportunidades</a>
+        <a data-route="about">Sobre</a>
+      </div>
+      <div>
+        <h5>Recursos</h5>
+        <a href="#">Categorias</a>
+        <a href="#">Bairros</a>
+        <a href="#">Proposta</a>
+        <a data-route="about">Contato</a>
+      </div>
+      <div>
+        <h5>Curitiba</h5>
+        <a>Centro · Batel · Água Verde</a>
+        <a>Portão · Bigorrilho · Cabral</a>
+        <a>Juvevê · Rebouças · Mercês</a>
+        <a>Santa Felicidade · Seminário</a>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <div class="container footer-bot-inner">
+        <span>© 2026 SEARCH DEEP · Prospecção comercial inteligente</span>
+        <span class="mono">v1.0 · Curitiba, PR</span>
+      </div>
+    </div>
+  </footer>
+
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="js/supabase-config.js"></script>
+  <script src="js/data.js"></script>
+  <script src="js/demo-templates.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
