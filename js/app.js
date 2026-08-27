@@ -663,110 +663,153 @@ function initMap(){
 
 function renderMap(){
   if(!state.map) initMap();
+
   // Limpa markers antigos
   state.markers.forEach(m => m.remove());
   state.markers.clear();
 
   state.biz.forEach(b => {
-    const opp = b.opp;
+    const opp = b.opp || 'baixa';
+    const rating = Number(b.rate);
+    const ratingLabel = Number.isFinite(rating) ? rating.toFixed(1) : '—';
+
     const icon = L.divIcon({
       className: 'sd-pin-wrap',
-      html: `<div class="map-pin ${opp}">${b.rate.toFixed(1)}</div>`,
-      iconSize: [30,30],
-      iconAnchor: [15,30],
+      html: `
+        <div class="map-pin ${opp}" data-biz-id="${b.id}" title="${b.name || 'Estabelecimento'}">
+          <span class="map-pin-core">${ratingLabel}</span>
+          <span class="map-pin-tip"></span>
+        </div>
+      `,
+      iconSize: [42,48],
+      iconAnchor: [21,46],
+      popupAnchor: [0,-42],
     });
-    // ============================================================
-// MARCADOR DO ESTABELECIMENTO
-// ============================================================
 
-// Converte latitude e longitude para números
-const lat = Number(b.lat);
-const lng = Number(b.lng);
+    // Converte e valida latitude/longitude antes de criar o marcador
+    const lat = Number(b.lat);
+    const lng = Number(b.lng);
+    let m = null;
 
-// Verifica se as coordenadas são válidas antes de criar o marcador
-let m = null;
-if (
-  Number.isFinite(lat) &&
-  Number.isFinite(lng) &&
-  lat >= -90 &&
-  lat <= 90 &&
-  lng >= -180 &&
-  lng <= 180
-) {
-  m = L.marker([lat, lng], { icon }).addTo(state.map);
+    if (
+      Number.isFinite(lat) &&
+      Number.isFinite(lng) &&
+      lat >= -90 && lat <= 90 &&
+      lng >= -180 && lng <= 180
+    ) {
+      m = L.marker([lat, lng], { icon, riseOnHover:true }).addTo(state.map);
 
-  const oppLabel = {
-    alta: 'Alta',
-    media: 'Média',
-    baixa: 'Baixa'
-  }[b.opp] || b.opp;
+      const oppLabel = {
+        alta: 'Alta oportunidade',
+        media: 'Média oportunidade',
+        baixa: 'Baixa oportunidade'
+      }[opp] || 'Oportunidade';
 
-  m.bindPopup(`
-    <div class="pp-name">${b.name || 'Estabelecimento'}</div>
+      const siteLabel = b.site ? 'Site disponível' : 'Sem site';
+      const igLabel = b.ig ? 'Instagram disponível' : 'Sem Instagram';
 
-    <div class="pp-meta">
-      ${b.subcat || 'Categoria não informada'}
-      · ${b.bairro || 'Bairro não informado'}
-      · ${b.dist ?? '—'} km
-    </div>
+      m.bindPopup(`
+        <div class="sd-map-popup">
+          <div class="pp-top">
+            <div>
+              <div class="pp-kicker">${b.subcat || 'Estabelecimento'}</div>
+              <div class="pp-name">${b.name || 'Estabelecimento'}</div>
+            </div>
+            <span class="pp-opp-badge ${opp}">${oppLabel}</span>
+          </div>
 
-    <div class="pp-rate">
-      ★ ${b.rate ?? '—'} (${b.reviews ?? 0} avaliações)
-    </div>
+          <div class="pp-location">
+            ${b.bairro || 'Bairro não informado'} · ${b.dist ?? '—'} km
+          </div>
 
-    <div class="pp-status ${b.open ? 'open' : 'closed'}">
-      ${b.open ? '● Aberto agora' : '● Fechado'}
-      · ${b.hours || 'Horário não informado'}
-    </div>
+          <div class="pp-grid">
+            <div class="pp-stat">
+              <span class="pp-stat-label">Avaliação</span>
+              <strong>★ ${ratingLabel}</strong>
+              <small>${b.reviews ?? 0} avaliações</small>
+            </div>
+            <div class="pp-stat">
+              <span class="pp-stat-label">Status</span>
+              <strong class="${b.open ? 'is-open' : 'is-closed'}">${b.open ? 'Aberto agora' : 'Fechado'}</strong>
+              <small>${b.hours || 'Horário não informado'}</small>
+            </div>
+          </div>
 
-    <div class="pp-opp ${b.opp || ''}">
-      Oportunidade: ${oppLabel || 'Não informada'}
-    </div>
+          <div class="pp-signals">
+            <span class="${b.site ? 'positive' : 'attention'}">${siteLabel}</span>
+            <span class="${b.ig ? 'positive' : 'attention'}">${igLabel}</span>
+          </div>
 
-    ${
-      b.phone
-        ? `<div class="pp-contact">${b.phone}</div>`
-        : ''
-    }
-  `);
-} else {
-  // Não cria o marcador quando as coordenadas são inválidas
-  console.warn(
-    'Estabelecimento ignorado: coordenadas inválidas',
-    {
-      nome: b.name,
-      latitude: b.lat,
-      longitude: b.lng
-    }
-  );
-}
-    if(m){
+          <button type="button" class="pp-details-btn" data-map-details="${b.id}">
+            Ver perfil completo
+            <span aria-hidden="true">→</span>
+          </button>
+        </div>
+      `, { maxWidth: 330, minWidth: 285 });
+
       m.on('click', () => {
+        selectMapBusiness(b.id, false);
+
         $$('.biz-card').forEach(c => c.classList.remove('active'));
         const card = document.querySelector(`.biz-card[data-id="${b.id}"]`);
-        if(card){ card.classList.add('active'); card.scrollIntoView({block:'nearest', behavior:'smooth'}); }
+        if(card){
+          card.classList.add('active');
+          card.scrollIntoView({block:'nearest', behavior:'smooth'});
+        }
       });
+
+      m.on('popupopen', e => {
+        selectMapBusiness(b.id, false);
+        const popupEl = e.popup && e.popup.getElement ? e.popup.getElement() : null;
+        const detailsBtn = popupEl && popupEl.querySelector(`[data-map-details="${b.id}"]`);
+        if(detailsBtn){
+          detailsBtn.addEventListener('click', () => openBizModal(b), { once:true });
+        }
+      });
+
       state.markers.set(b.id, m);
+    } else {
+      console.warn('Estabelecimento ignorado: coordenadas inválidas', {
+        nome: b.name,
+        latitude: b.lat,
+        longitude: b.lng
+      });
     }
   });
 
-  // Ajusta automaticamente o zoom/posição do mapa pros resultados
-  // filtrados no momento — sem isso, filtrar/pesquisar não "aparecia"
-  // no mapa visualmente porque a câmera ficava parada no centro fixo.
-  // Usa só estabelecimentos com coordenadas válidas, senão o Leaflet
-  // lança "Invalid LatLng object" e trava o script inteiro.
+  // Ajusta automaticamente o zoom/posição do mapa pros resultados filtrados
   const validBiz = state.biz.filter(b => {
     const lat = Number(b.lat), lng = Number(b.lng);
     return Number.isFinite(lat) && Number.isFinite(lng) &&
       lat >= -90 && lat <= 90 && lng >= -180 && lng <= 180;
   });
+
   if(validBiz.length === 1){
     const b = validBiz[0];
     state.map.flyTo([Number(b.lat), Number(b.lng)], 16, { duration:0.6 });
   } else if(validBiz.length){
     const bounds = L.latLngBounds(validBiz.map(b => [Number(b.lat), Number(b.lng)]));
-    state.map.flyToBounds(bounds, { padding:[40,40], maxZoom:15, duration:0.6 });
+    state.map.flyToBounds(bounds, { padding:[46,46], maxZoom:15, duration:0.6 });
   }
+}
+
+function clearSelectedMapBusiness(){
+  state.markers.forEach(marker => {
+    const el = marker.getElement();
+    if(el) el.classList.remove('is-selected');
+  });
+}
+
+function selectMapBusiness(id, openPopup=true){
+  clearSelectedMapBusiness();
+
+  const marker = state.markers.get(id);
+  if(!marker) return;
+
+  const el = marker.getElement();
+  if(el) el.classList.add('is-selected');
+
+  if(openPopup) marker.openPopup();
 }
 
 function highlightMarker(id, on){
@@ -774,19 +817,16 @@ function highlightMarker(id, on){
   if(!m) return;
   const el = m.getElement();
   if(!el) return;
-  const pin = el.querySelector('.map-pin');
-  if(!pin) return;
-  if(on){ pin.style.transform = 'translate(-50%,-100%) scale(1.3)'; pin.style.boxShadow = '0 0 0 4px rgba(255,255,255,.4), 0 6px 18px rgba(0,0,0,.5)'; }
-  else { pin.style.transform = ''; pin.style.boxShadow = ''; }
+  el.classList.toggle('is-hovered', !!on);
 }
 
 function focusMarker(b){
   if(!state.map) return;
   const lat = Number(b.lat), lng = Number(b.lng);
   if(!Number.isFinite(lat) || !Number.isFinite(lng)) return;
-  state.map.setView([lat, lng], 15, { animate:true });
-  const m = state.markers.get(b.id);
-  if(m) m.openPopup();
+
+  state.map.flyTo([lat, lng], 16, { animate:true, duration:0.55 });
+  selectMapBusiness(b.id, true);
 }
 
 /* ====================================================
