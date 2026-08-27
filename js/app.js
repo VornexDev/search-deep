@@ -675,32 +675,96 @@ function renderMap(){
       iconSize: [30,30],
       iconAnchor: [15,30],
     });
-    const m = L.marker([b.lat, b.lng], { icon }).addTo(state.map);
-    const oppLabel = { alta:'Alta', media:'Média', baixa:'Baixa' }[b.opp] || b.opp;
-    m.bindPopup(`
-      <div class="pp-name">${b.name}</div>
-      <div class="pp-meta">${b.subcat} · ${b.bairro} · ${b.dist} km</div>
-      <div class="pp-rate">★ ${b.rate} (${b.reviews} avaliações)</div>
-      <div class="pp-status ${b.open ? 'open' : 'closed'}">${b.open ? '● Aberto agora' : '● Fechado'} · ${b.hours}</div>
-      <div class="pp-opp ${b.opp}">Oportunidade: ${oppLabel}</div>
-      ${b.phone ? `<div class="pp-contact">${b.phone}</div>` : ''}
-    `);
-    m.on('click', () => {
-      $$('.biz-card').forEach(c => c.classList.remove('active'));
-      const card = document.querySelector(`.biz-card[data-id="${b.id}"]`);
-      if(card){ card.classList.add('active'); card.scrollIntoView({block:'nearest', behavior:'smooth'}); }
-    });
-    state.markers.set(b.id, m);
+    // ============================================================
+// MARCADOR DO ESTABELECIMENTO
+// ============================================================
+
+// Converte latitude e longitude para números
+const lat = Number(b.lat);
+const lng = Number(b.lng);
+
+// Verifica se as coordenadas são válidas antes de criar o marcador
+let m = null;
+if (
+  Number.isFinite(lat) &&
+  Number.isFinite(lng) &&
+  lat >= -90 &&
+  lat <= 90 &&
+  lng >= -180 &&
+  lng <= 180
+) {
+  m = L.marker([lat, lng], { icon }).addTo(state.map);
+
+  const oppLabel = {
+    alta: 'Alta',
+    media: 'Média',
+    baixa: 'Baixa'
+  }[b.opp] || b.opp;
+
+  m.bindPopup(`
+    <div class="pp-name">${b.name || 'Estabelecimento'}</div>
+
+    <div class="pp-meta">
+      ${b.subcat || 'Categoria não informada'}
+      · ${b.bairro || 'Bairro não informado'}
+      · ${b.dist ?? '—'} km
+    </div>
+
+    <div class="pp-rate">
+      ★ ${b.rate ?? '—'} (${b.reviews ?? 0} avaliações)
+    </div>
+
+    <div class="pp-status ${b.open ? 'open' : 'closed'}">
+      ${b.open ? '● Aberto agora' : '● Fechado'}
+      · ${b.hours || 'Horário não informado'}
+    </div>
+
+    <div class="pp-opp ${b.opp || ''}">
+      Oportunidade: ${oppLabel || 'Não informada'}
+    </div>
+
+    ${
+      b.phone
+        ? `<div class="pp-contact">${b.phone}</div>`
+        : ''
+    }
+  `);
+} else {
+  // Não cria o marcador quando as coordenadas são inválidas
+  console.warn(
+    'Estabelecimento ignorado: coordenadas inválidas',
+    {
+      nome: b.name,
+      latitude: b.lat,
+      longitude: b.lng
+    }
+  );
+}
+    if(m){
+      m.on('click', () => {
+        $$('.biz-card').forEach(c => c.classList.remove('active'));
+        const card = document.querySelector(`.biz-card[data-id="${b.id}"]`);
+        if(card){ card.classList.add('active'); card.scrollIntoView({block:'nearest', behavior:'smooth'}); }
+      });
+      state.markers.set(b.id, m);
+    }
   });
 
   // Ajusta automaticamente o zoom/posição do mapa pros resultados
   // filtrados no momento — sem isso, filtrar/pesquisar não "aparecia"
   // no mapa visualmente porque a câmera ficava parada no centro fixo.
-  if(state.biz.length === 1){
-    const b = state.biz[0];
-    state.map.flyTo([b.lat, b.lng], 16, { duration:0.6 });
-  } else if(state.biz.length){
-    const bounds = L.latLngBounds(state.biz.map(b => [b.lat, b.lng]));
+  // Usa só estabelecimentos com coordenadas válidas, senão o Leaflet
+  // lança "Invalid LatLng object" e trava o script inteiro.
+  const validBiz = state.biz.filter(b => {
+    const lat = Number(b.lat), lng = Number(b.lng);
+    return Number.isFinite(lat) && Number.isFinite(lng) &&
+      lat >= -90 && lat <= 90 && lng >= -180 && lng <= 180;
+  });
+  if(validBiz.length === 1){
+    const b = validBiz[0];
+    state.map.flyTo([Number(b.lat), Number(b.lng)], 16, { duration:0.6 });
+  } else if(validBiz.length){
+    const bounds = L.latLngBounds(validBiz.map(b => [Number(b.lat), Number(b.lng)]));
     state.map.flyToBounds(bounds, { padding:[40,40], maxZoom:15, duration:0.6 });
   }
 }
@@ -718,7 +782,9 @@ function highlightMarker(id, on){
 
 function focusMarker(b){
   if(!state.map) return;
-  state.map.setView([b.lat, b.lng], 15, { animate:true });
+  const lat = Number(b.lat), lng = Number(b.lng);
+  if(!Number.isFinite(lat) || !Number.isFinite(lng)) return;
+  state.map.setView([lat, lng], 15, { animate:true });
   const m = state.markers.get(b.id);
   if(m) m.openPopup();
 }
@@ -910,6 +976,7 @@ function openBizModal(b){
   `;
 
   $('#bizModal').classList.add('show');
+  $('#bizModal').setAttribute('aria-hidden', 'false');
   document.body.style.overflow = 'hidden';
 
   // Bindings
@@ -927,7 +994,13 @@ function openBizModal(b){
 }
 
 function closeBizModal(){
+  // Tira o foco de dentro do modal antes de escondê-lo — senão o
+  // navegador acusa "aria-hidden em elemento com foco retido".
+  if(document.activeElement && $('#bizModal').contains(document.activeElement)){
+    document.activeElement.blur();
+  }
   $('#bizModal').classList.remove('show');
+  $('#bizModal').setAttribute('aria-hidden', 'true');
   document.body.style.overflow = '';
   state.activeBiz = null;
 }
@@ -1036,6 +1109,7 @@ function openDemoPreview(d){
   }
 
   $('#demoModal').classList.add('show');
+  $('#demoModal').setAttribute('aria-hidden', 'false');
   document.body.style.overflow = 'hidden';
   // Sempre reabre no modo desktop, com o botão certo marcado
   $$('#demoModal .dev').forEach(x => x.classList.remove('active'));
@@ -1068,7 +1142,11 @@ function bindDeviceToggle(){
 }
 
 function closeDemo(){
+  if(document.activeElement && $('#demoModal').contains(document.activeElement)){
+    document.activeElement.blur();
+  }
   $('#demoModal').classList.remove('show');
+  $('#demoModal').setAttribute('aria-hidden', 'true');
   document.body.style.overflow = '';
   // Limpa o conteúdo (para o iframe/animações imediatamente, em vez
   // de deixar rodando escondido até a próxima demo ser aberta).
@@ -1202,11 +1280,16 @@ Aguardo seu retorno!`;
   };
 
   $('#propModal').classList.add('show');
+  $('#propModal').setAttribute('aria-hidden', 'false');
   document.body.style.overflow = 'hidden';
 }
 
 function closeProp(){
+  if(document.activeElement && $('#propModal').contains(document.activeElement)){
+    document.activeElement.blur();
+  }
   $('#propModal').classList.remove('show');
+  $('#propModal').setAttribute('aria-hidden', 'true');
   if(!$('#bizModal').classList.contains('show')) document.body.style.overflow = '';
 }
 
@@ -1393,24 +1476,10 @@ function bindNav(){
    INIT
    ==================================================== */
 function init(){
-  renderCategories();
-  renderFilterCats();
-  renderFilterBairros();
-  renderDemos();
-  renderResults();
-  bindFilterSwitches();
-  bindSearch();
-  bindViewToggle();
-  bindNav();
-  bindAuth();
-  initAuthParticles();
-  bindUserChip();
-  applyFilters();
-
-  // Gate: consulta o Supabase para saber se já existe sessão válida
-  initAuth();
-
-  // Modal close
+  // Bindings de fechar modal (X, clique fora, ESC) vêm ANTES de tudo
+  // que mexe com dados/mapa. Assim, mesmo que algo mais abaixo (ex:
+  // renderMap) jogue um erro, fechar os modais continua funcionando —
+  // foi justamente um erro nessa parte que travava o fechamento antes.
   $('#closeModal').addEventListener('click', closeBizModal);
   $('#bizModal').addEventListener('click', e => { if(e.target.id==='bizModal') closeBizModal(); });
   $('#closeProp').addEventListener('click', closeProp);
@@ -1428,12 +1497,6 @@ function init(){
     if(e.target.closest('#closeProp')) closeProp();
   });
 
-  // Nav active
-  $$('.nav-link').forEach(l => l.addEventListener('click', () => {
-    $$('.nav-link').forEach(x => x.classList.remove('active'));
-    l.classList.add('active');
-  }));
-
   // ESC fecha modais
   document.addEventListener('keydown', e => {
     if(e.key==='Escape'){
@@ -1442,6 +1505,29 @@ function init(){
       closeDemo();
     }
   });
+
+  renderCategories();
+  renderFilterCats();
+  renderFilterBairros();
+  renderDemos();
+  renderResults();
+  bindFilterSwitches();
+  bindSearch();
+  bindViewToggle();
+  bindNav();
+  bindAuth();
+  initAuthParticles();
+  bindUserChip();
+  applyFilters();
+
+  // Gate: consulta o Supabase para saber se já existe sessão válida
+  initAuth();
+
+  // Nav active
+  $$('.nav-link').forEach(l => l.addEventListener('click', () => {
+    $$('.nav-link').forEach(x => x.classList.remove('active'));
+    l.classList.add('active');
+  }));
 }
 
 if(document.readyState==='loading') document.addEventListener('DOMContentLoaded', init);
